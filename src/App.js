@@ -1,20 +1,23 @@
 import React from 'react';
-import ProgressBar from './ProgressBar'
+import ProgressBar from './ProgressBar';
+import TopList from './TopList';
+import WinScreen from './WinScreen';
+import { texts } from './content/texts.json';
 
-let text1 = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. \
-Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. \
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. \
-Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-
-let text2 = 'Taki testowy tekst sobie napisze zeby sprawdzac';
-let text3 = "We're all pretty bizarre. Some of us are just better at hiding it, that's all."
-let text = "I'd tell you all you want and more, if the sounds I made could be what you hear."
+let text = ""
 var arrText = [];
 var textToShow = [];
 var words = 0;
 let completedText = [];
 let completedWords = [];
 let oneWordProgress = 0;
+const noCopy={
+    webkitUserSelect: 'none',  /* Chrome all / Safari all */
+    mozUserSelect: 'none',     /* Firefox all */
+    msUserSelect: 'none',      /* IE 10+ */
+    userSelect: 'none',          /* Likely future */     
+  
+}
 export default class Main extends React.Component {
   constructor(props) {
     super(props);
@@ -24,22 +27,15 @@ export default class Main extends React.Component {
       timeToStart: 5,
       writingTime: 0,
       wpm: 0,
-      progress: 0
+      progress: 0,
+      winScreen:false,
     }
-    arrText = text.split('');
-    textToShow = text.slice(0);
-    //count how many words
-    let s = text;
-    s = s.replace(/(^\s*)|(\s*$)/gi, "");
-    s = s.replace(/[ ]{2,}/gi, " ");
-    s = s.replace(/\n /, "\n");
-    let howManyWords = s.split(' ').length
-    console.log(howManyWords)
-    oneWordProgress = 100 / howManyWords;
+
   }
 
 
-  componentDidMount() {
+  async componentDidMount() {
+    await this.readFromFile();
     this.intervalTimeToStart = setInterval(() => {
       if (this.state.timeToStart > 1) {
         this.setState(prevState => ({
@@ -58,6 +54,21 @@ export default class Main extends React.Component {
     }, 1000);
 
   }
+
+  readFromFile = () => {
+    let i = Math.floor(Math.random() * texts.length);
+    text = texts[i].text
+    arrText = text.split('');
+    textToShow = text.slice(0);
+    //count how many words
+    let s = text;
+    s = s.replace(/(^\s*)|(\s*$)/gi, "");
+    s = s.replace(/[ ]{2,}/gi, " ");
+    s = s.replace(/\n /, "\n");
+    let howManyWords = s.split(' ').length
+    oneWordProgress = 100 / howManyWords;
+  }
+
 
   writingTime = () => {
     this.intervalWritingTime = setInterval(() => {
@@ -86,6 +97,7 @@ export default class Main extends React.Component {
         completedText.push(input[n])
         rest.splice(0, 1)
         if (n + 1 === arrText.length) {
+          //end of text
           words++
           //stop counting
           clearInterval(this.intervalWritingTime)
@@ -94,6 +106,7 @@ export default class Main extends React.Component {
             inputValue: '',
             progress: 100,
             wpm: Math.round(words / (this.state.writingTime / 60)),
+            winScreen:true,
           });
           console.log('you won')
         }
@@ -103,13 +116,12 @@ export default class Main extends React.Component {
           completedWords += input;
           completedText = [];
           let progressTemp = oneWordProgress
+          let currentWPM = Math.round(words / (this.state.writingTime / 60));
           this.setState(prevState => ({
             inputValue: '',
             progress: prevState.progress + progressTemp,
-            wpm: Math.round(words / (this.state.writingTime / 60)),
+            wpm: currentWPM,
           }));
-          console.log(this.state.progress)
-          console.log('spacja');
         }
       }
       else {
@@ -147,20 +159,18 @@ export default class Main extends React.Component {
 
   render() {
     return (
-      <div style={{ margin: '50px' }}>
-        <div>
-          {this.state.wpm} wpm
-        </div>
-        <div style={{ width: '700', display: 'inline-block', backgroundColor: 'lightGray', fontSize: '130%', top: '20px', margin:'20px' }}>
-          <ProgressBar progress={this.state.progress} />
-          <div style={{marginTop:'20px'}}>
-            {textToShow}
+      <div style={{ margin: '100px' }}>
+        <div style={{ width: '700', display: 'inline-block', backgroundColor: 'lightGray', fontSize: '130%', top: '20px', margin: '20px' }}>
+          <ProgressBar progress={this.state.progress} wpm={this.state.wpm} />
+          <div style={{ marginTop: '20px' }}>
+            <p style={noCopy}>{textToShow}</p>
           </div>
           <input value={this.state.inputValue}
             onChange={this.updateInputValue}
             style={{ width: '700' }}
             ref={(input) => { this.nameInput = input; }}
             disabled={this.state.disabled} />
+          {this.state.writingTime}
         </div>
         {!this.intervalWritingTime ? (
           <div style={{ display: 'inline-block', textAlign: 'center', marginLeft: '90px' }}>
@@ -171,13 +181,18 @@ export default class Main extends React.Component {
               </div>
             </div>
           </div>) : (
-            <div>
-
+            <div style={{ display: 'inline-block', textAlign: 'center', marginLeft: '90px' }} >
             </div>)}
-        <div>
-
+        <div style={{ display: 'inline-block', textAlign: 'right', float: 'right' }}>
+          <TopList />
         </div>
-        {this.state.writingTime}
+        {this.state.winScreen ? (
+          <div>
+            <WinScreen wpm={this.state.wpm}/>
+          </div>) :
+          (
+            <div></div>
+          )}
       </div>
     );
   }
