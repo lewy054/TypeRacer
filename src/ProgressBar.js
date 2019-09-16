@@ -2,7 +2,7 @@ import React from 'react';
 export default class ProgressBar extends React.Component {
     render() {
         let currentWidth = this.props.progress + '%'
-        let wpm = this.props.wpm +'WPM'
+        let wpm = this.props.wpm + 'WPM'
         return (
             <div>
                 <div style={{
@@ -14,7 +14,7 @@ export default class ProgressBar extends React.Component {
                         height: '30px',
                         backgroundColor: '#4CAF50',
                         textAlign: 'center',
-                        color:'white'
+                        color: 'white'
                     }}>{wpm}</div>
                 </div>
             </div>

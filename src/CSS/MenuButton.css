@@ -1,0 +1,38 @@
+.menuButton {
+  border-radius: 4px;
+  background-color: #0300cf;
+  border: none;
+  color: #ffffff;
+  text-align: center;
+  font-size: 28px;
+  padding: 20px;
+  width: 200px;
+  transition: all 0.5s;
+  cursor: pointer;
+  margin: 5px;
+}
+
+.menuButton span {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  transition: 0.5s;
+}
+
+.menuButton span:after {
+  content: "\00ab";
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  left: -80px;
+  transition: 0.5s;
+}
+
+.menuButton:hover span {
+  padding-left: 25px;
+}
+
+.menuButton:hover span:after {
+  opacity: 1;
+  left: 0;
+}

@@ -1,18 +1,18 @@
 #topList {
-    border-collapse: collapse;
-    width: 100%;
-  }
-  
-  #topList td, #topList th {
-    border: 1px solid #ddd;
-    padding: 8px;
-  }
-  
-  
-  #topList th {
-    padding-top: 12px;
-    padding-bottom: 12px;
-    text-align: left;
-    background-color: #4CAF50;
-    color: white;
-  }
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#topList td,
+#topList th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#topList th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #0300cf;
+  color: white;
+}

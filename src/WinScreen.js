@@ -24,11 +24,13 @@ export default class WinScreen extends React.Component {
                         <h2>Result</h2>
                     </div>
                     <div className="modal-body">
-                        <p>Your score:</p>
-                        <p>{this.props.wpm} words per minute</p>
+                        <p style={{ fontSize: '150%' }}>{this.props.wpm} words per minute</p>
+                        <br />
+                        <p style={{ fontSize: '100%' }}>You just typed a quote from</p>
+                        <p style={{ fontSize: '100%' }}>{this.props.source}</p>
                     </div>
-                </div>
 
+                </div>
             </div>
         )
     }

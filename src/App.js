@@ -2,21 +2,24 @@ import React from 'react';
 import ProgressBar from './ProgressBar';
 import TopList from './TopList';
 import WinScreen from './WinScreen';
+import TryAgain from './TryAgain'
+import MenuButton from './MenuButton'
 import { texts } from './content/texts.json';
 
-let text = ""
-var arrText = [];
-var textToShow = [];
-var words = 0;
-let completedText = [];
-let completedWords = [];
-let oneWordProgress = 0;
-const noCopy={
-    webkitUserSelect: 'none',  /* Chrome all / Safari all */
-    mozUserSelect: 'none',     /* Firefox all */
-    msUserSelect: 'none',      /* IE 10+ */
-    userSelect: 'none',          /* Likely future */     
-  
+let text;
+let source;
+let arrText;
+let textToShow;
+let words;
+let completedText;
+let completedWords;
+let oneWordProgress;
+const noCopy = {
+  WebkitUserSelect: 'none',
+  MozUserSelect: 'none',
+  msUserSelect: 'none',
+  userSelect: 'none',
+
 }
 export default class Main extends React.Component {
   constructor(props) {
@@ -28,13 +31,41 @@ export default class Main extends React.Component {
       writingTime: 0,
       wpm: 0,
       progress: 0,
-      winScreen:false,
+      winScreen: false,
+      lowestWPM: '',
     }
 
   }
 
 
-  async componentDidMount() {
+  componentDidMount() {
+    this.start()
+  }
+
+  start = async () => {
+    //reset everything
+    clearInterval(this.intervalTimeToStart)
+    clearInterval(this.intervalWritingTime)
+    text = "";
+    source = "";
+    arrText = [];
+    textToShow = [];
+    words = 0;
+    completedText = [];
+    completedWords = [];
+    oneWordProgress = [];
+    this.setState({
+      inputValue: '',
+      disabled: true,
+      timeToStart: 5,
+      writingTime: 0,
+      wpm: 0,
+      progress: 0,
+      winScreen: false,
+      lowestWPM: '',
+    })
+
+
     await this.readFromFile();
     this.intervalTimeToStart = setInterval(() => {
       if (this.state.timeToStart > 1) {
@@ -52,12 +83,12 @@ export default class Main extends React.Component {
         clearInterval(this.intervalTimeToStart)
       }
     }, 1000);
-
   }
 
   readFromFile = () => {
     let i = Math.floor(Math.random() * texts.length);
     text = texts[i].text
+    source = texts[i].source
     arrText = text.split('');
     textToShow = text.slice(0);
     //count how many words
@@ -79,6 +110,13 @@ export default class Main extends React.Component {
     }, 1000);
   }
 
+  callbackFunction = (childData) => {
+    this.setState({ lowestWPM: childData })
+  }
+
+  resetApp = () => {
+    this.start()
+  }
 
   updateInputValue = (e) => {
     arrText = text.split('');
@@ -97,18 +135,7 @@ export default class Main extends React.Component {
         completedText.push(input[n])
         rest.splice(0, 1)
         if (n + 1 === arrText.length) {
-          //end of text
-          words++
-          //stop counting
-          clearInterval(this.intervalWritingTime)
-          this.setState({
-            disabled: true,
-            inputValue: '',
-            progress: 100,
-            wpm: Math.round(words / (this.state.writingTime / 60)),
-            winScreen:true,
-          });
-          console.log('you won')
+          this.end()
         }
         if (n + 1 === input.length && input.slice(-1) === ' ') {
           //end of word
@@ -157,38 +184,76 @@ export default class Main extends React.Component {
   }
 
 
+  end = () => {
+    //end of text
+    words++
+    //stop counting
+    clearInterval(this.intervalWritingTime)
+    this.setState({
+      disabled: true,
+      inputValue: '',
+      progress: 100,
+      wpm: Math.round(words / (this.state.writingTime / 60)),
+      winScreen: true,
+    });
+    console.log('you won')
+    this.checkIfTop()
+  }
+
+  checkIfTop = () => {
+    if (parseFloat(this.state.wpm) > this.state.lowestWPM) {
+      console.log('you are in top')
+    }
+  }
+
+
   render() {
     return (
-      <div style={{ margin: '100px' }}>
-        <div style={{ width: '700', display: 'inline-block', backgroundColor: 'lightGray', fontSize: '130%', top: '20px', margin: '20px' }}>
-          <ProgressBar progress={this.state.progress} wpm={this.state.wpm} />
-          <div style={{ marginTop: '20px' }}>
-            <p style={noCopy}>{textToShow}</p>
-          </div>
-          <input value={this.state.inputValue}
-            onChange={this.updateInputValue}
-            style={{ width: '700' }}
-            ref={(input) => { this.nameInput = input; }}
-            disabled={this.state.disabled} />
-          {this.state.writingTime}
-        </div>
-        {!this.intervalWritingTime ? (
-          <div style={{ display: 'inline-block', textAlign: 'center', marginLeft: '90px' }}>
-            <p style={{ fontSize: '150%' }}>Start in:</p>
-            <div>
+      <div style={{
+        width: '100%',
+        textAlign: 'center'
+      }}>
+        <div style={{ width: '50%', height: '100%', margin: '0 auto', backgroundColor: '#6ba4ff', display: 'inline-block' }}>
+          {this.state.disabled ? (
+            <div style={{ textAlign: 'center', zIndex: '20' }}>
+              <p style={{ fontSize: '150%' }}>Start in:</p>
               <div>
-                <p style={{ fontSize: '150%' }}>{this.state.timeToStart}</p>
+                <div>
+                  <p className='numbers' style={{ fontSize: '150%' }}>{this.state.timeToStart}</p>
+                </div>
               </div>
+            </div>) : (
+              <div style={{ textAlign: 'center', marginLeft: '90px' }} >
+              </div>)}
+          <div style={{ width: '700', position: 'absolute', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'lightGray', textAlign: 'center', fontSize: '130%', top: '30%', margin: '20px', padding:'20px' }}>
+            <ProgressBar progress={this.state.progress} wpm={this.state.wpm} />
+            <div style={{ marginTop: '20px' }}>
+              <p style={noCopy}>{textToShow}</p>
             </div>
-          </div>) : (
-            <div style={{ display: 'inline-block', textAlign: 'center', marginLeft: '90px' }} >
-            </div>)}
-        <div style={{ display: 'inline-block', textAlign: 'right', float: 'right' }}>
-          <TopList />
+            <input value={this.state.inputValue}
+              onChange={this.updateInputValue}
+              style={{ width: '700' }}
+              ref={(input) => { this.nameInput = input; }}
+              disabled={this.state.disabled} />
+            {this.state.writingTime}
+          </div>
+          <div style={{
+            position: 'absolute',
+            bottom: '5%',
+            clear: 'left',
+            width: '50%'
+          }}>
+            <MenuButton style={{ textAlign: 'left' }} />
+
+            <TryAgain style={{ textAlign: 'right' }} resetApp={this.resetApp} />
+          </div>
         </div>
+        {/* <div style={{ display: 'inline-block', textAlign: 'right', float: 'right' }}>
+          <TopList parentCallback={this.callbackFunction} />
+        </div> */}
         {this.state.winScreen ? (
           <div>
-            <WinScreen wpm={this.state.wpm}/>
+            <WinScreen wpm={this.state.wpm} source={source} />
           </div>) :
           (
             <div></div>

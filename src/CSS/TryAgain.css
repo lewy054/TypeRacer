@@ -1,0 +1,39 @@
+.tryAgain {
+    border-radius: 4px;
+    background-color: #0300cf;
+    border: none;
+    color: #FFFFFF;
+    text-align: center;
+    font-size: 28px;
+    padding: 20px;
+    width: 200px;
+    transition: all 0.5s;
+    cursor: pointer;
+    margin: 5px;
+  
+  }
+  
+  .tryAgain span {
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    transition: 0.5s;
+  }
+  
+  .tryAgain span:after {
+    content: '\00bb';
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    right: -80px;
+    transition: 0.5s;
+  }
+  
+  .tryAgain:hover span {
+    padding-right: 25px;
+  }
+  
+  .tryAgain:hover span:after {
+    opacity: 1;
+    right: 0;
+  }
