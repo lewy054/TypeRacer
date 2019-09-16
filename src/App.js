@@ -4,7 +4,9 @@ import TopList from './TopList';
 import WinScreen from './WinScreen';
 import TryAgain from './TryAgain'
 import MenuButton from './MenuButton'
-import { texts } from './content/texts.json';
+import { english } from './content/english.json';
+import { polish } from './content/polish.json';
+
 
 let text;
 let source;
@@ -34,6 +36,7 @@ export default class Main extends React.Component {
       winScreen: false,
       lowestWPM: '',
     }
+    console.log(this.props.language)
 
   }
 
@@ -86,6 +89,17 @@ export default class Main extends React.Component {
   }
 
   readFromFile = () => {
+    var texts='';
+    switch (this.props.language) {
+      case 'English':
+         texts = english;
+        break;
+      case 'Polish':
+         texts = polish;
+        break;
+      default:
+         texts = english;
+    }
     let i = Math.floor(Math.random() * texts.length);
     text = texts[i].text
     source = texts[i].source
@@ -225,7 +239,7 @@ export default class Main extends React.Component {
             </div>) : (
               <div style={{ textAlign: 'center', marginLeft: '90px' }} >
               </div>)}
-          <div style={{ width: '700', position: 'absolute', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'lightGray', textAlign: 'center', fontSize: '130%', top: '30%', margin: '20px', padding:'20px' }}>
+          <div style={{ width: '700', position: 'absolute', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'lightGray', textAlign: 'center', fontSize: '130%', top: '30%', margin: '20px', padding: '20px' }}>
             <ProgressBar progress={this.state.progress} wpm={this.state.wpm} />
             <div style={{ marginTop: '20px' }}>
               <p style={noCopy}>{textToShow}</p>
