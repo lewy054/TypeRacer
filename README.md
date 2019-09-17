@@ -1,4 +1,4 @@
-###### To run this project use 'npm start'
+# To run this project use 'npm start'. You probably have to install node_modules, to do that use 'npm install'.
 
 ## Available Scripts
 
