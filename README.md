@@ -1,4 +1,4 @@
-###### To run this project use 'npm test'
+###### To run this project use 'npm start'
 
 ## Available Scripts
 
