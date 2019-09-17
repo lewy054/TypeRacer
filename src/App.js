@@ -1,6 +1,6 @@
 import React from 'react';
 import ProgressBar from './ProgressBar';
-import TopList from './TopList';
+//import TopList from './TopList';
 import WinScreen from './WinScreen';
 import TryAgain from './TryAgain'
 import MenuButton from './MenuButton'
@@ -16,6 +16,7 @@ let words;
 let completedText;
 let completedWords;
 let oneWordProgress;
+let howManyChar;
 const noCopy = {
   WebkitUserSelect: 'none',
   MozUserSelect: 'none',
@@ -36,6 +37,7 @@ export default class Main extends React.Component {
       winScreen: false,
       lowestWPM: '',
       color: '',
+      howManyChar:0
     }
 
   }
@@ -54,6 +56,7 @@ export default class Main extends React.Component {
     arrText = [];
     textToShow = [];
     words = 0;
+    howManyChar = 0;
     completedText = [];
     completedWords = [];
     oneWordProgress = [];
@@ -62,6 +65,7 @@ export default class Main extends React.Component {
       disabled: true,
       timeToStart: 5,
       writingTime: 0,
+      howManyChar:0,
       wpm: 0,
       progress: 0,
       winScreen: false,
@@ -73,7 +77,7 @@ export default class Main extends React.Component {
       await this.readFromFile();
     }
     else {
-      text = this.makeSentence()
+      text = this.makeRandomSentence()
       this.getTextReady()
     }
     this.intervalTimeToStart = setInterval(() => {
@@ -137,6 +141,7 @@ export default class Main extends React.Component {
     s = s.replace(/\n /, "\n");
     let howManyWords = s.split(' ').length
     oneWordProgress = 100 / howManyWords;
+    howManyChar = text.length;
   }
 
   //----------for random letters----------
@@ -146,8 +151,8 @@ export default class Main extends React.Component {
     return Math.floor(Math.random() * (max - min)) + min;
   }
 
-  makeSentence = () => {
-    let length = this.textLenght(100, 400)
+  makeRandomSentence = () => {
+    let length = this.textLenght(65, 400)
     let result = [];
     let characters = 'ab cdefghijklmno pqrs tuvwxyz .';
     let charactersLength = characters.length;
@@ -245,7 +250,7 @@ export default class Main extends React.Component {
 
 
     textToShow.push(
-      <div>
+      <p style={noCopy} key="textToShow">
         <span style={{ backgroundColor: '#00bd06' }}>
           {completedWords}
         </span>
@@ -258,7 +263,7 @@ export default class Main extends React.Component {
         <span>
           {rest}
         </span>
-      </div>
+      </p>
     )
   }
 
@@ -273,6 +278,7 @@ export default class Main extends React.Component {
       inputValue: '',
       progress: 100,
       wpm: Math.round(words / (this.state.writingTime / 60)),
+      howManyChar: (howManyChar/this.state.writingTime).toFixed(2),
       winScreen: true,
     });
     //this.checkIfTop()
@@ -306,7 +312,7 @@ export default class Main extends React.Component {
           <div style={{ width: '70%', position: 'relative', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'lightGray', textAlign: 'center', fontSize: '180%', top: '40%', padding: '20px' }}>
             <ProgressBar progress={this.state.progress} wpm={this.state.wpm} />
             <div style={{ marginTop: '20px' }}>
-              <p style={noCopy}>{textToShow}</p>
+              <div >{textToShow}</div>
             </div>
             <input value={this.state.inputValue}
               onChange={this.updateInputValue}
@@ -333,7 +339,7 @@ export default class Main extends React.Component {
         </div> */}
         {this.state.winScreen ? (
           <div>
-            <WinScreen wpm={this.state.wpm} source={source} />
+            <WinScreen wpm={this.state.wpm} source={source} howManyChar={this.state.howManyChar} random={this.props.random} />
           </div>) :
           (
             <div></div>

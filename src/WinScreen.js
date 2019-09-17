@@ -25,9 +25,17 @@ export default class WinScreen extends React.Component {
                     </div>
                     <div className="modal-body">
                         <p style={{ fontSize: '150%' }}>{this.props.wpm} words per minute</p>
-                        <br />
-                        <p style={{ fontSize: '100%' }}>You just typed a quote from</p>
-                        <p style={{ fontSize: '100%' }}>{this.props.source}</p>
+                        <br/>
+                        <p style={{ fontSize: '150%' }}>{this.props.howManyChar} characters per second</p>
+                        {!this.props.random ? (
+                            <div>
+                                <br />
+                                <p style={{ fontSize: '100%' }}>You just typed a quote from</p>
+                                <p style={{ fontSize: '100%' }}>{this.props.source}</p>
+                            </div>) : (
+                                <div>
+                                </div>
+                            )}
                     </div>
 
                 </div>

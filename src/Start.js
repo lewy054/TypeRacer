@@ -7,8 +7,8 @@ export default class StartPage extends React.Component {
         super(props);
         this.state = {
             language: 'English',
-            random:false,
-            display:''
+            random: false,
+            display: ''
         };
     }
 
@@ -22,16 +22,15 @@ export default class StartPage extends React.Component {
         })
     }
 
-    handleChange=(event)=>{
-        console.log(event.target.checked)
-        if(this.state.random){
+    handleChange = (event) => {
+        if (this.state.random) {
             this.setState({
-                display:'block'
+                display: 'block'
             })
         }
-        else{
+        else {
             this.setState({
-                display:'none'
+                display: 'none'
             })
         }
         this.setState({
@@ -48,21 +47,26 @@ export default class StartPage extends React.Component {
                         fontSize: '200%'
                     }}>Test your typing skills</p>
                 </div>
-                <div style={{top:'50%'}}>
+                <div style={{ top: '50%' }}>
                     <button className='start' onClick={this.start}>Start</button>
-                    <label className="container">Random letters
-                    <input type="checkbox" checked={this.state.random}  onChange={this.handleChange} />
-                        <span className="checkmark" ></span>
-                    </label>
+
                 </div>
-                <div className="language" style={{display:this.state.display}}>
+                <div className="language" style={{ display: this.state.display }}>
                     <h2>Select the language of the texts</h2>
                     <form >
-                        <select className="select-css" value={this.state.language} disabled={this.state.random}  onChange={this.changeLanguage}>
+                        <select className="select-css" value={this.state.language} disabled={this.state.random} onChange={this.changeLanguage}>
                             <option value="English">English</option>
                             <option value="Polish">Polish</option>
                         </select>
                     </form>
+                </div>
+                <div className="random">
+                    <div className="container">
+                        <label className="container">Random letters
+                    <input type="checkbox" checked={this.state.random} onChange={this.handleChange} />
+                            <span className="checkmark" ></span>
+                        </label>
+                    </div>
                 </div>
             </div>
         )
