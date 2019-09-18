@@ -1,9 +1,10 @@
 import React from 'react';
 import ProgressBar from './ProgressBar';
-import TopList from './TopList';
+//import TopList from './TopList';
 import WinScreen from './WinScreen';
-import TryAgain from './TryAgain'
+import Restart from './Restart'
 import MenuButton from './MenuButton'
+import './CSS/App.css'
 import { english } from './content/english.json';
 import { polish } from './content/polish.json';
 
@@ -16,6 +17,7 @@ let words;
 let completedText;
 let completedWords;
 let oneWordProgress;
+let howManyChar;
 const noCopy = {
   WebkitUserSelect: 'none',
   MozUserSelect: 'none',
@@ -35,8 +37,9 @@ export default class Main extends React.Component {
       progress: 0,
       winScreen: false,
       lowestWPM: '',
+      color: '',
+      howManyChar: 0
     }
-    console.log(this.props.language)
 
   }
 
@@ -45,36 +48,35 @@ export default class Main extends React.Component {
     this.start()
   }
 
-  start = async () => {
-    //reset everything
-    clearInterval(this.intervalTimeToStart)
-    clearInterval(this.intervalWritingTime)
-    text = "";
-    source = "";
-    arrText = [];
-    textToShow = [];
-    words = 0;
-    completedText = [];
-    completedWords = [];
-    oneWordProgress = [];
-    this.setState({
-      inputValue: '',
-      disabled: true,
-      timeToStart: 5,
-      writingTime: 0,
-      wpm: 0,
-      progress: 0,
-      winScreen: false,
-      lowestWPM: '',
-    })
+  start = (sameText = false) => {
 
-
-    await this.readFromFile();
+    this.restartData(sameText)
+    if (!sameText) {
+      this.getText()
+    }
+    else{
+      this.getTextReady()
+    }
     this.intervalTimeToStart = setInterval(() => {
       if (this.state.timeToStart > 1) {
         this.setState(prevState => ({
           timeToStart: prevState.timeToStart - 1
         }));
+        if (this.state.timeToStart > 3) {
+          this.setState({
+            color: 'red'
+          })
+        }
+        else if (this.state.timeToStart > 1) {
+          this.setState({
+            color: 'orange'
+          })
+        }
+        else {
+          this.setState({
+            color: 'green'
+          })
+        }
       }
       else {
         this.setState({
@@ -88,21 +90,70 @@ export default class Main extends React.Component {
     }, 1000);
   }
 
+  tryAgain = () => {
+    this.start(true)
+  }
+
+  restartData = (sameText = false) => {
+    //reset everything
+    clearInterval(this.intervalTimeToStart)
+    clearInterval(this.intervalWritingTime)
+    if (!sameText) {
+      text = "";
+      source = "";
+    }
+    arrText = [];
+    textToShow = [];
+    words = 0;
+    howManyChar = 0;
+    completedText = [];
+    completedWords = [];
+    oneWordProgress = [];
+    this.setState({
+      inputValue: '',
+      disabled: true,
+      timeToStart: 5,
+      writingTime: 0,
+      howManyChar: 0,
+      wpm: 0,
+      progress: 0,
+      winScreen: false,
+      lowestWPM: '',
+      color: 'red'
+    })
+  }
+
   readFromFile = () => {
-    var texts='';
+    var texts = '';
     switch (this.props.language) {
       case 'English':
-         texts = english;
+        texts = english;
         break;
       case 'Polish':
-         texts = polish;
+        texts = polish;
         break;
       default:
-         texts = english;
+        texts = english;
     }
     let i = Math.floor(Math.random() * texts.length);
     text = texts[i].text
     source = texts[i].source
+    this.getTextReady()
+  }
+
+
+  getText = async () => {
+    if (!this.props.random) {
+      await this.readFromFile();
+    }
+    else {
+      text = this.makeRandomSentence()
+      this.getTextReady()
+    }
+  }
+
+
+  getTextReady = () => {
     arrText = text.split('');
     textToShow = text.slice(0);
     //count how many words
@@ -112,8 +163,49 @@ export default class Main extends React.Component {
     s = s.replace(/\n /, "\n");
     let howManyWords = s.split(' ').length
     oneWordProgress = 100 / howManyWords;
+    howManyChar = text.length;
   }
 
+  //----------for random letters----------
+  textLenght = (min, max) => {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min;
+  }
+
+  makeRandomSentence = () => {
+    let length = this.textLenght(65, 400)
+    let result = [];
+    let characters = 'ab cdefghijklmno pqrs tuvwxyz .';
+    let charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+      let letter = characters.charAt(Math.floor(Math.random() * charactersLength));
+      if (result[result.length - 1] === ' ') {
+        if (result[result.length - 2] === '.') {
+          letter = letter.toUpperCase()
+        }
+        if (letter === ' ') {
+          continue;
+        }
+        if (letter === '.') {
+          continue;
+        }
+
+      }
+
+      if (letter === '.') {
+        result.push('.')
+        result.push(' ')
+        continue;
+      }
+      result.push(letter)
+    }
+    result.push('.')
+    result = result.join('')
+    result = result.charAt(0).toUpperCase() + result.slice(1)
+    return result;
+  }
+  //------------------------------------
 
   writingTime = () => {
     this.intervalWritingTime = setInterval(() => {
@@ -167,20 +259,16 @@ export default class Main extends React.Component {
       }
       else {
         //the letter is incorrect
-        if (input.slice(-1) === ' ') {
-          break;
-        }
-        else {
-          rest.splice(0, 1)
-          wrong.push(arrText[n])
-          break;
-        }
+        rest.splice(0, 1)
+        wrong.push(arrText[n])
+        break;
+
       }
     }
 
 
     textToShow.push(
-      <div>
+      <p style={noCopy} key="textToShow">
         <span style={{ backgroundColor: '#00bd06' }}>
           {completedWords}
         </span>
@@ -193,7 +281,7 @@ export default class Main extends React.Component {
         <span>
           {rest}
         </span>
-      </div>
+      </p>
     )
   }
 
@@ -208,17 +296,17 @@ export default class Main extends React.Component {
       inputValue: '',
       progress: 100,
       wpm: Math.round(words / (this.state.writingTime / 60)),
+      howManyChar: (howManyChar / this.state.writingTime).toFixed(2),
       winScreen: true,
     });
-    console.log('you won')
-    this.checkIfTop()
+    //this.checkIfTop()
   }
 
-  checkIfTop = () => {
-    if (parseFloat(this.state.wpm) > this.state.lowestWPM) {
-      console.log('you are in top')
-    }
-  }
+  // checkIfTop = () => {
+  //   if (parseFloat(this.state.wpm) > this.state.lowestWPM) {
+  //     console.log('you are in top')
+  //   }
+  // }
 
 
   render() {
@@ -227,39 +315,41 @@ export default class Main extends React.Component {
         width: '100%',
         textAlign: 'center'
       }}>
-        <div style={{ width: '50%', height: '100%', margin: '0 auto', backgroundColor: '#6ba4ff', display: 'inline-block' }}>
+        <div style={{ width: '70%', height: '100%', margin: '0 auto', backgroundColor: '#6ba4ff', display: 'inline-block', borderRadius: '20px' }}>
           {this.state.disabled ? (
-            <div style={{ textAlign: 'center', zIndex: '20' }}>
-              <p style={{ fontSize: '150%' }}>Start in:</p>
+            <div style={{ textAlign: 'center', position: 'absolute', top: '0px', zIndex: '20' }}>
+              <h1 style={{ fontSize: '150%', margin: '20px' }}>Start in:</h1>
               <div>
                 <div>
                   <p className='numbers' style={{ fontSize: '150%' }}>{this.state.timeToStart}</p>
                 </div>
               </div>
             </div>) : (
-              <div style={{ textAlign: 'center', marginLeft: '90px' }} >
+              <div>
               </div>)}
-          <div style={{ width: '700', position: 'absolute', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'lightGray', textAlign: 'center', fontSize: '130%', top: '30%', margin: '20px', padding: '20px' }}>
+          <div style={{ width: '70%', position: 'relative', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'lightGray', textAlign: 'center', fontSize: '180%', top: '40%', padding: '20px', borderRadius: '20px' }}>
             <ProgressBar progress={this.state.progress} wpm={this.state.wpm} />
             <div style={{ marginTop: '20px' }}>
-              <p style={noCopy}>{textToShow}</p>
+              <div >{textToShow}</div>
             </div>
             <input value={this.state.inputValue}
               onChange={this.updateInputValue}
-              style={{ width: '700' }}
+              style={{ width: '70%' }}
               ref={(input) => { this.nameInput = input; }}
               disabled={this.state.disabled} />
+            <br />
             {this.state.writingTime}
+            <div style={{ height: this.state.timeToStart * 10, backgroundColor: this.state.color }}></div>
           </div>
           <div style={{
             position: 'absolute',
             bottom: '5%',
             clear: 'left',
-            width: '50%'
+            width: '70%'
           }}>
             <MenuButton style={{ textAlign: 'left' }} />
-
-            <TryAgain style={{ textAlign: 'right' }} resetApp={this.resetApp} />
+            <button className="tryAgain" onClick={this.tryAgain}><span>Try Again </span></button>
+            <Restart style={{ textAlign: 'right' }} resetApp={this.resetApp} />
           </div>
         </div>
         {/* <div style={{ display: 'inline-block', textAlign: 'right', float: 'right' }}>
@@ -267,7 +357,7 @@ export default class Main extends React.Component {
         </div> */}
         {this.state.winScreen ? (
           <div>
-            <WinScreen wpm={this.state.wpm} source={source} />
+            <WinScreen wpm={this.state.wpm} source={source} howManyChar={this.state.howManyChar} random={this.props.random} />
           </div>) :
           (
             <div></div>
